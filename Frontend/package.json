@@ -47,6 +47,7 @@
     "format": "prettier --write .",
     "eject": "react-scripts eject"
   },
+  "homepage": ".",
   "eslintConfig": {
     "extends": ["react-app", "react-app/jest"]
   },
