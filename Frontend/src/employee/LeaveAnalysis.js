@@ -3,8 +3,6 @@ import React, { useEffect, useState } from 'react';
 import CanvasJSReact from '@canvasjs/react-charts';
 import BackendURLS from '../config';
 import { Spinner } from '@nextui-org/react';
-import { ToastContainer } from 'react-toastify';
-// import './LeaveAnalysis.css'; // Import CSS file
 const CanvasJSChart = CanvasJSReact.CanvasJSChart;
 
 export default function LeaveAnalysis() {
@@ -17,36 +15,29 @@ export default function LeaveAnalysis() {
                     Authorization: sessionStorage.getItem('EmployeeToken')
                 }
             });
-            // console.log("Analysis data:", response.data); // Add this line to check the received data
             setAnalysis(response.data);
         } catch (error) {
             console.log(error.message);
         }
     };
+
     useEffect(() => {
-        const ID = JSON.parse(sessionStorage.getItem('employee')).EmployeeID
+        const ID = JSON.parse(sessionStorage.getItem('employee')).EmployeeID;
         fetchAnalysis(ID);
     }, []);
 
     const renderChart = () => {
-        if (!analysis) return (
-            <div align="center" className='spinner' >
-                <Spinner size='lg' color="warning" label='Loading Analysis.....' />
-            </div>
-        );
+        if (!analysis) {
+            return (
+                <div align="center" className='spinner'>
+                    <Spinner size='lg' color="warning" label='Loading Analysis...' />
+                </div>
+            );
+        }
 
-        const { EmployeeCount, LeaveCount, LeavePendingCount, LeaveApprovedCount, LeaveRejectedCount, CasualLeaveCount, MaternityLeaveCount, MedicalLeaveCount, HalfPaidLeaveLeaveCount, CompensatedCasualLeaveCount, SickLeaveCount, LeaveCountDayByDay } = analysis;
+        const { LeaveCountDayByDay, CasualLeaveCount, MaternityLeaveCount, MedicalLeaveCount, HalfPaidLeaveLeaveCount, CompensatedCasualLeaveCount, SickLeaveCount } = analysis;
 
-        // Data for column chart
-        const columnDataPoints = [
-            { label: 'Employees', y: EmployeeCount },
-            { label: 'Total Leaves', y: LeaveCount },
-            { label: 'Pending Leaves', y: LeavePendingCount },
-            { label: 'Approved Leaves', y: LeaveApprovedCount },
-            { label: 'Rejected Leaves', y: LeaveRejectedCount }
-        ];
-
-        // Data for pie chart for LeaveType
+        // Pie chart data for LeaveType
         const typePieDataPoints = [
             { y: CasualLeaveCount, name: 'Casual Leave' },
             { y: MaternityLeaveCount, name: 'Maternity Leave' },
@@ -55,44 +46,18 @@ export default function LeaveAnalysis() {
             { y: CompensatedCasualLeaveCount, name: 'Compensated Casual Leave' },
             { y: SickLeaveCount, name: 'Sick Leave' }
         ];
-        console.log("LeaveCountDayByDay:", LeaveCountDayByDay);
 
+        // Scatter chart data for LeaveCount vs Date
         const scatterDataPoints = LeaveCountDayByDay ? LeaveCountDayByDay.map(data => ({
             x: new Date(data._id),
             y: data.count
         })).sort((a, b) => a.x - b.x) : [];
 
-        console.log("scatterDataPoints:", scatterDataPoints);
-        // Data for pie chart for LeaveStatus
-        const statusPieDataPoints = [
-            { y: LeavePendingCount, name: 'Pending Leaves' },
-            { y: LeaveApprovedCount, name: 'Approved Leaves' },
-            { y: LeaveRejectedCount, name: 'Rejected Leaves' }
-        ];
-
-        // Data for scatter chart (LeaveCount vs EmployeeCount)
-        // const scatterDataPoints = [
-        //     { x: EmployeeCount, y: LeaveCount }
-        // ];
-
-        const columnOptions = {
-            animationEnabled: true,
-            theme: "light2",
-            title: {
-                text: "Leave Analysis"
-            },
-            axisY: {
-                title: "Count"
-            },
-            data: [{
-                type: "column",
-                dataPoints: columnDataPoints
-            }]
-        };
+        const predefinedColors = ["red", "blue", "green", "orange", "purple", "yellow", "cyan", "magenta", "lime", "pink"];
 
         const typePieOptions = {
             animationEnabled: true,
-            exportEnabled:true,
+            exportEnabled: true,
             title: {
                 text: "Leave Types"
             },
@@ -105,25 +70,6 @@ export default function LeaveAnalysis() {
             }]
         };
 
-        // const scatterOptions = {
-        //     animationEnabled: true,
-        //     title: {
-        //         text: "LeaveCount vs EmployeeCount"
-        //     },
-        //     axisX: {
-        //         title: "Employee Count"
-        //     },
-        //     axisY: {
-        //         title: "Leave Count"
-        //     },
-        //     data: [{
-        //         type: "scatter",
-        //         markerSize: 10,
-        //         toolTipContent: "<b>Employee Count:</b> {x}<br/><b>Leave Count:</b> {y}",
-        //         dataPoints: scatterDataPoints
-        //     }]
-        // };
-        const predefinedColors = ["red", "blue", "green", "orange", "purple", "yellow", "cyan", "magenta", "lime", "pink"]; // Add more colors as needed
         const scatterOptions = {
             exportEnabled: true,
             animationEnabled: true,
@@ -132,7 +78,7 @@ export default function LeaveAnalysis() {
             },
             axisX: {
                 title: "Date",
-                valueFormatString: "DD MMM YYYY" // Format for displaying the date
+                valueFormatString: "DD MMM YYYY"
             },
             axisY: {
                 title: "Leave Count"
@@ -144,27 +90,26 @@ export default function LeaveAnalysis() {
                 toolTipContent: "<b>Date:</b> {x}<br/><b>Leave Count:</b> {y}",
                 dataPoints: scatterDataPoints.map((point, index) => ({
                     ...point,
-                    color: predefinedColors[index % predefinedColors.length] // Cycle through predefined colors
+                    color: predefinedColors[index % predefinedColors.length]
                 }))
             }]
         };
 
         return (
-            <div >
-            <h1 className="headingleave mt-10" align="center" >Your Leave Analysis</h1>
-            <div className="leaveAnalysisContainer mt-6" style={{zIndex:-1}} > {/* Apply animation to this container */}
-                <div style={{ display: "inline-block", width: "50%" }}>
-                    <CanvasJSChart options={typePieOptions} />
+            <div>
+                <h1 className="headingleave mt-10" align="center">Your Leave Analysis</h1>
+                <div className="leaveAnalysisContainer mt-6" style={{ zIndex: -1 }}>
+                    <div style={{ display: "inline-block", width: "50%" }}>
+                        <CanvasJSChart options={typePieOptions} />
+                    </div>
+                    <div style={{ display: "inline-block", width: "50%" }}>
+                        {scatterDataPoints.length > 0 ? (
+                            <CanvasJSChart options={scatterOptions} />
+                        ) : (
+                            <p>No data available for scatter chart</p>
+                        )}
+                    </div>
                 </div>
-                
-                <div style={{ display: "inline-block", width: "50%" }}>
-                    {scatterDataPoints.length > 0 ? (
-                        <CanvasJSChart options={scatterOptions} />
-                    ) : (
-                        <p>No data available for scatter chart</p>
-                    )}
-                </div>
-            </div>
             </div>
         );
     };

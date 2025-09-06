@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from "react";
-import AdminNavBar from "./AdminNavBar";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import BackendURLS from "../config";
-import { ToastContainer } from "react-toastify";
 import { Button, Spinner } from "@nextui-org/react";
 
 // Import local fallback images
@@ -19,66 +17,61 @@ export default function ViewEmployeeByID() {
   const navigate = useNavigate();
   const { id } = useParams();
 
-  // Fetch employee details
-  const fetchEmployeeData = async () => {
-    try {
-      const response = await axios.get(
-        `${BackendURLS.Admin}/employeebyID/${id}`,
-        {
-          headers: {
-            Authorization: sessionStorage.getItem("AdminToken"),
-          },
-        }
-      );
-      setEmployeeData(response.data);
-    } catch (error) {
-      console.error("Error fetching employee data:", error);
-    }
-  };
-
-  // Fetch employee profile from backend
-  const getProfile = async () => {
-    try {
-      const response = await axios.get(
-        `${BackendURLS.Admin}/viewProfile/${id}`,
-        {
-          headers: {
-            Authorization: sessionStorage.getItem("AdminToken"),
-          },
-          responseType: "arraybuffer",
-        }
-      );
-
-      const base64 = btoa(
-        new Uint8Array(response.data).reduce(
-          (data, byte) => data + String.fromCharCode(byte),
-          ""
-        )
-      );
-      const dataUrl = `data:image/jpeg;base64,${base64}`;
-      return dataUrl;
-    } catch (error) {
-      console.error("Error fetching profile image:", error);
-      return ""; // fallback to gender-based avatar
-    }
-  };
-
   useEffect(() => {
-    fetchEmployeeData();
+    const fetchEmployeeData = async () => {
+      try {
+        const response = await axios.get(
+          `${BackendURLS.Admin}/employeebyID/${id}`,
+          {
+            headers: { Authorization: sessionStorage.getItem("AdminToken") },
+          }
+        );
+        setEmployeeData(response.data);
+      } catch (error) {
+        console.error("Error fetching employee data:", error);
+      }
+    };
+    fetchEmployeeData(); // ✅ moved inside useEffect to avoid missing dependency warning
   }, [id]);
 
   useEffect(() => {
-    if (employeeData && employeeData.EmployeeID) {
-      getProfile(employeeData.EmployeeID).then((profileUrl) => {
-        setProfile(profileUrl);
-      });
-    }
+    if (!employeeData?.EmployeeID) return;
+
+    const getProfile = async () => {
+      try {
+        const response = await axios.get(
+          `${BackendURLS.Admin}/viewProfile/${employeeData.EmployeeID}`,
+          {
+            headers: { Authorization: sessionStorage.getItem("AdminToken") },
+            responseType: "arraybuffer",
+          }
+        );
+
+        const base64 = btoa(
+          new Uint8Array(response.data).reduce(
+            (data, byte) => data + String.fromCharCode(byte),
+            ""
+          )
+        );
+        const dataUrl = `data:image/jpeg;base64,${base64}`;
+        setProfile(dataUrl);
+      } catch (error) {
+        console.error("Error fetching profile image:", error);
+        setProfile(""); // fallback
+      }
+    };
+    getProfile(); // ✅ moved inside useEffect to fix missing dependency warning
   }, [employeeData]);
 
+  const getAvatar = () => {
+    if (profile && !profile.includes("Not_Uploaded")) return profile;
+    if (employeeData?.EmployeeGender?.toLowerCase() === "male") return maleAvatar;
+    if (employeeData?.EmployeeGender?.toLowerCase() === "female") return femaleAvatar;
+    return defaultAvatar;
+  };
+
   return (
-    <div>
-      <br />
-      <br />
+    <div className="py-10">
       <div className="flex justify-center items-center">
         <motion.div
           initial={{ opacity: 0, scale: 0.5 }}
@@ -91,90 +84,50 @@ export default function ViewEmployeeByID() {
           </h1>
 
           {employeeData ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 flex-container">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Profile Section */}
               <div className="text-center">
-                <div className="card">
-                  <img
-                    src={
-                      profile && !profile.includes("Not_Uploaded")
-                        ? profile
-                        : employeeData?.EmployeeGender?.toLowerCase() ===
-                          "male"
-                        ? maleAvatar
-                        : employeeData?.EmployeeGender?.toLowerCase() ===
-                          "female"
-                        ? femaleAvatar
-                        : defaultAvatar
-                    }
-                    alt="avatar"
-                    className="rounded-full mx-auto mb-4"
-                    style={{ width: "150px", height: "150px" }}
-                  />
-                  <div className="card-info">
-                    <p className="text-gray-500 mb-2">
-                      Name: {employeeData.EmployeeName}
-                    </p>
-                    <p className="text-gray-500 mb-2">
-                      Date of Birth: {employeeData.EmployeeDOB}
-                    </p>
-                    <p className="text-gray-500 mb-2">
-                      Gender: {employeeData.EmployeeGender}
-                    </p>
-                    <p className="text-gray-500 mb-2">
-                      Age: {employeeData.EmployeeAge}
-                    </p>
-                    <p className="text-gray-500 mb-2">
-                      Email: {employeeData.EmployeeMailID}
-                    </p>
-                    <p className="text-gray-500 mb-2">
-                      Contact: {employeeData.EmployeeContact}
-                    </p>
-                  </div>
+                <img
+                  src={getAvatar()}
+                  alt="Employee Avatar"
+                  className="rounded-full mx-auto mb-4"
+                  style={{ width: "150px", height: "150px" }}
+                />
+                <div className="text-gray-500">
+                  <p>Name: {employeeData.EmployeeName}</p>
+                  <p>Date of Birth: {employeeData.EmployeeDOB}</p>
+                  <p>Gender: {employeeData.EmployeeGender}</p>
+                  <p>Age: {employeeData.EmployeeAge}</p>
+                  <p>Email: {employeeData.EmployeeMailID}</p>
+                  <p>Contact: {employeeData.EmployeeContact}</p>
                 </div>
               </div>
 
               {/* Work Info Section */}
               <div className="text-center">
-                <br />
-                <br />
-                <br />
-                <div className="card">
-                  <div className="card-info">
-                    <p className="text-gray-500 mb-2">
-                      Department: {employeeData.EmployeeDepartment}
-                    </p>
-                    <p className="text-gray-500 mb-2">
-                      Qualification: {employeeData.EmployeeQualification}
-                    </p>
-                    <p className="text-gray-500 mb-2">
-                      Salary: {employeeData.EmployeeSalary}
-                    </p>
-                    <p className="text-gray-500 mb-2">
-                      Location: {employeeData.EmployeeLocation}
-                    </p>
-                  </div>
-                  <div className="flex justify-center">
-                    <button
-                      className="button"
-                      onClick={() =>
-                        navigate(`/admin/UpdateEmployee/${employeeData.EmployeeID}`)
-                      }
-                    >
-                      Update
-                    </button>
-                    &nbsp;&nbsp;
-                    <button
-                      className="button"
-                      onClick={() =>
-                        navigate(
-                          `/admin/viewleaveHistory/${employeeData.EmployeeID}`
-                        )
-                      }
-                    >
-                      View Leave History
-                    </button>
-                  </div>
+                <div className="text-gray-500">
+                  <p>Department: {employeeData.EmployeeDepartment}</p>
+                  <p>Qualification: {employeeData.EmployeeQualification}</p>
+                  <p>Salary: {employeeData.EmployeeSalary}</p>
+                  <p>Location: {employeeData.EmployeeLocation}</p>
+                </div>
+                <div className="flex justify-center mt-4 gap-4">
+                  <Button
+                    onClick={() =>
+                      navigate(`/admin/UpdateEmployee/${employeeData.EmployeeID}`)
+                    }
+                  >
+                    Update
+                  </Button>
+                  <Button
+                    onClick={() =>
+                      navigate(
+                        `/admin/viewleaveHistory/${employeeData.EmployeeID}`
+                      )
+                    }
+                  >
+                    View Leave History
+                  </Button>
                 </div>
               </div>
             </div>
@@ -182,7 +135,7 @@ export default function ViewEmployeeByID() {
             <Spinner size="lg" label="Loading...." />
           )}
 
-          <div align="center">
+          <div className="text-center mt-6">
             <Button
               color="secondary"
               variant="shadow"
