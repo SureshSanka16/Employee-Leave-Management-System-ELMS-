@@ -1,6 +1,6 @@
 const BackendURLS = {
-    Admin: 'http://localhost:4059/admin',
-    Employee: 'http://localhost:4059/employee'
+    Admin: 'https://employee-leave-management-system-el.vercel.app/admin',
+    Employee: 'https://employee-leave-management-system-el.vercel.app/employee'
 };
 
 export default BackendURLS;
