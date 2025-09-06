@@ -1,13 +1,13 @@
-import React, { useEffect } from 'react';
-import image21 from './images/21.png'; 
-import Typed from 'typed.js'; 
+import { useEffect } from 'react';
+import image21 from '../components/images/21.png'
+import Typed from 'typed.js';
 
 export default function MainHome() {
   useEffect(() => {
     const typed = new Typed('#typed-text', {
       strings: ['Welcome To Employee Leave Management System'], 
       typeSpeed: 50,
-      loop: false,
+      loop: false, // <-- properly closed
     });
 
     return () => {
