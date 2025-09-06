@@ -5,35 +5,29 @@ import { motion } from "framer-motion";
 import BackendURLS from "../config";
 import { Button, Spinner } from "@nextui-org/react";
 
-// Import local fallback images
-import maleAvatar from "../profiles/male.jpg";
-import femaleAvatar from "../profiles/female.jpg";
-import defaultAvatar from "../profiles/Not_Uploaded.jpg";
-
 export default function ViewEmployeeByID() {
   const [employeeData, setEmployeeData] = useState(null);
-  const [profile, setProfile] = useState("");
-
+  const [profile, setProfile] = useState(""); // base64 or public fallback
   const navigate = useNavigate();
   const { id } = useParams();
 
+  // Fetch employee data
   useEffect(() => {
     const fetchEmployeeData = async () => {
       try {
         const response = await axios.get(
           `${BackendURLS.Admin}/employeebyID/${id}`,
-          {
-            headers: { Authorization: sessionStorage.getItem("AdminToken") },
-          }
+          { headers: { Authorization: sessionStorage.getItem("AdminToken") } }
         );
         setEmployeeData(response.data);
       } catch (error) {
         console.error("Error fetching employee data:", error);
       }
     };
-    fetchEmployeeData(); // ✅ moved inside useEffect to avoid missing dependency warning
+    fetchEmployeeData();
   }, [id]);
 
+  // Fetch employee profile image from backend
   useEffect(() => {
     if (!employeeData?.EmployeeID) return;
 
@@ -53,93 +47,133 @@ export default function ViewEmployeeByID() {
             ""
           )
         );
-        const dataUrl = `data:image/jpeg;base64,${base64}`;
-        setProfile(dataUrl);
+
+        setProfile(`data:image/jpeg;base64,${base64}`);
       } catch (error) {
         console.error("Error fetching profile image:", error);
         setProfile(""); // fallback
       }
     };
-    getProfile(); // ✅ moved inside useEffect to fix missing dependency warning
+
+    getProfile();
   }, [employeeData]);
 
+  // Determine which avatar to show
   const getAvatar = () => {
-    if (profile && !profile.includes("Not_Uploaded")) return profile;
-    if (employeeData?.EmployeeGender?.toLowerCase() === "male") return maleAvatar;
-    if (employeeData?.EmployeeGender?.toLowerCase() === "female") return femaleAvatar;
-    return defaultAvatar;
+    if (profile) return profile;
+    if (employeeData?.EmployeeGender?.toLowerCase() === "male")
+      return "/images/male.jpg";
+    if (employeeData?.EmployeeGender?.toLowerCase() === "female")
+      return "/images/female.jpg";
+    return "/images/Not_Uploaded.jpg";
   };
+
+  if (!employeeData) {
+    return (
+      <div className="flex justify-center items-center mt-20">
+        <Spinner size="lg" label="Loading Employee Profile..." />
+      </div>
+    );
+  }
 
   return (
     <div className="py-10">
-      <div className="flex justify-center items-center">
+      <div className="flex justify-center">
         <motion.div
-          initial={{ opacity: 0, scale: 0.5 }}
+          initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
-          className="bg-white shadow-md rounded-lg p-6 w-full max-w-screen-lg"
+          className="bg-white shadow-xl rounded-xl p-8 max-w-4xl w-full"
         >
-          <h1 className="text-3xl text-center font-semibold mb-4">
+          <h1 className="text-4xl font-bold text-center mb-8 text-gray-800">
             Employee Profile
           </h1>
 
-          {employeeData ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Profile Section */}
-              <div className="text-center">
-                <img
-                  src={getAvatar()}
-                  alt="Employee Avatar"
-                  className="rounded-full mx-auto mb-4"
-                  style={{ width: "150px", height: "150px" }}
-                />
-                <div className="text-gray-500">
-                  <p>Name: {employeeData.EmployeeName}</p>
-                  <p>Date of Birth: {employeeData.EmployeeDOB}</p>
-                  <p>Gender: {employeeData.EmployeeGender}</p>
-                  <p>Age: {employeeData.EmployeeAge}</p>
-                  <p>Email: {employeeData.EmployeeMailID}</p>
-                  <p>Contact: {employeeData.EmployeeContact}</p>
-                </div>
-              </div>
-
-              {/* Work Info Section */}
-              <div className="text-center">
-                <div className="text-gray-500">
-                  <p>Department: {employeeData.EmployeeDepartment}</p>
-                  <p>Qualification: {employeeData.EmployeeQualification}</p>
-                  <p>Salary: {employeeData.EmployeeSalary}</p>
-                  <p>Location: {employeeData.EmployeeLocation}</p>
-                </div>
-                <div className="flex justify-center mt-4 gap-4">
-                  <Button
-                    onClick={() =>
-                      navigate(`/admin/UpdateEmployee/${employeeData.EmployeeID}`)
-                    }
-                  >
-                    Update
-                  </Button>
-                  <Button
-                    onClick={() =>
-                      navigate(
-                        `/admin/viewleaveHistory/${employeeData.EmployeeID}`
-                      )
-                    }
-                  >
-                    View Leave History
-                  </Button>
-                </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+            {/* Profile Section */}
+            <div className="text-center">
+              <img
+                src={getAvatar()}
+                alt={employeeData.EmployeeName}
+                className="rounded-full w-40 h-40 object-cover mx-auto mb-4 shadow-lg"
+              />
+              <div className="text-left space-y-2 text-gray-700">
+                <p>
+                  <span className="font-semibold">Name:</span>{" "}
+                  {employeeData.EmployeeName}
+                </p>
+                <p>
+                  <span className="font-semibold">Date of Birth:</span>{" "}
+                  {employeeData.EmployeeDOB}
+                </p>
+                <p>
+                  <span className="font-semibold">Gender:</span>{" "}
+                  {employeeData.EmployeeGender}
+                </p>
+                <p>
+                  <span className="font-semibold">Age:</span>{" "}
+                  {employeeData.EmployeeAge}
+                </p>
+                <p>
+                  <span className="font-semibold">Email:</span>{" "}
+                  {employeeData.EmployeeMailID}
+                </p>
+                <p>
+                  <span className="font-semibold">Contact:</span>{" "}
+                  {employeeData.EmployeeContact}
+                </p>
               </div>
             </div>
-          ) : (
-            <Spinner size="lg" label="Loading...." />
-          )}
 
-          <div className="text-center mt-6">
+            {/* Work Info Section */}
+            <div className="text-left space-y-4">
+              <div className="bg-gray-50 p-4 rounded-lg shadow-inner space-y-2">
+                <p>
+                  <span className="font-semibold">Department:</span>{" "}
+                  {employeeData.EmployeeDepartment}
+                </p>
+                <p>
+                  <span className="font-semibold">Qualification:</span>{" "}
+                  {employeeData.EmployeeQualification}
+                </p>
+                <p>
+                  <span className="font-semibold">Salary:</span>{" "}
+                  {employeeData.EmployeeSalary}
+                </p>
+                <p>
+                  <span className="font-semibold">Location:</span>{" "}
+                  {employeeData.EmployeeLocation}
+                </p>
+              </div>
+
+              <div className="flex gap-4 justify-center md:justify-start mt-4">
+                <Button
+                  onClick={() =>
+                    navigate(`/admin/UpdateEmployee/${employeeData.EmployeeID}`)
+                  }
+                  color="primary"
+                  auto
+                >
+                  Update
+                </Button>
+                <Button
+                  onClick={() =>
+                    navigate(`/admin/viewleaveHistory/${employeeData.EmployeeID}`)
+                  }
+                  color="secondary"
+                  auto
+                >
+                  View Leave History
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-center mt-8">
             <Button
-              color="secondary"
-              variant="shadow"
               onClick={() => navigate(`/admin/viewemployees`)}
+              color="default"
+              auto
             >
               Go Back
             </Button>

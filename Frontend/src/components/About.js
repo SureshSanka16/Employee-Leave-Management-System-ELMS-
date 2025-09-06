@@ -56,7 +56,7 @@ export default function About() {
           <span className="text-pink-400 font-semibold">S. Suresh</span>,{' '}
           <span className="text-pink-400 font-semibold">Y. Naga Vignesh Reddy</span>,{' '}
           <span className="text-pink-400 font-semibold">A. Vishnu Vardhan Reddy</span>,{' '}
-          <span className="text-pink-400 font-semibold">G. Anajani Gopaiah</span>
+          <span className="text-pink-400 font-semibold">G. Anjani Gopaiah</span>
         </p>
       </div>
     </motion.div>

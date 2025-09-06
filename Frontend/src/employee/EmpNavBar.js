@@ -4,23 +4,22 @@ import ApplyLeave from "./ApplyLeave";
 import EmployeeHome from "./EmployeeHome";
 import EmployeeProfile from "./EmployeeProfile";
 import LeaveHistory1 from "./LeaveHistory";
+import ViewLeave from "./ViewLeave";
+import LeaveAnalysis from './LeaveAnalysis';
+import PageNotFound from "./PageNotFound";
 import BackendURLS from "../config";
 import axios from "axios";
-import ViewLeave from "./ViewLeave";
-import PageNotFound from "./PageNotFound";
-import LeaveAnalysis from './LeaveAnalysis';
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
 
-export default function EmpNavBar() {
+export default function EmpNavBar({ setIsEmployeeLoggedIn }) {
   const navigate = useNavigate();
-  const [employee, setEmployee] = useState(() => JSON.parse(sessionStorage.getItem('employee')));
+const [employee] = useState(() => JSON.parse(sessionStorage.getItem('employee')));
   const [profile, setProfile] = useState("");
 
   // Fetch profile image
   useEffect(() => {
     if (!employee) return setProfile("");
-
     axios.get(`${BackendURLS.Employee}/viewProfile/${employee.EmployeeID}`, {
       headers: { Authorization: sessionStorage.getItem('EmployeeToken') },
       responseType: "arraybuffer"
@@ -34,26 +33,21 @@ export default function EmpNavBar() {
     .catch(() => setProfile(""));
   }, [employee]);
 
-  // Logout
+  // Logout function
   const handleLogout = () => {
     sessionStorage.removeItem("employee");
     sessionStorage.removeItem("isEmployeeLoggedIn");
     sessionStorage.removeItem("EmployeeToken");
-    setEmployee(null);
-    setProfile("");
-    toast.success("Logged out successfully!", {
-                    theme: "colored",
-                    autoClose: 1000,
-                  });
-        
-    navigate("/employeelogin");
+    setIsEmployeeLoggedIn(false); // Switch back to main NavBar
+    toast.success("Logged out successfully!", { theme: "colored", autoClose: 1000 });
+    navigate("/", { replace: true }); // Redirect to MainHome
   };
 
-  const navLinkClass = "text-white hover:text-pink-400 focus:text-pink-400 active:text-pink-400 visited:text-white transition";
+  const navLinkClass = "text-white hover:text-pink-400 transition";
 
   return (
     <div className="relative min-h-screen">
-      {/* Glass Navbar */}
+      {/* Fixed Navbar */}
       <motion.nav
         initial={{ y: -80, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -63,7 +57,7 @@ export default function EmpNavBar() {
       >
         <div className="flex-1 flex items-center gap-4">
           <Link className={`${navLinkClass} font-bold text-xl`}>Employee Leave Management System</Link>
-          <Link className={`${navLinkClass} font-semibold text-lg ml-4`}>Employee Portal</Link>
+          <Link className={`${navLinkClass} font-semibold text-lg ml-60`}>Employee Portal</Link>
         </div>
 
         <div className="flex-none">
@@ -96,10 +90,9 @@ export default function EmpNavBar() {
         </div>
       </motion.nav>
 
-      {/* Routes */}
+      {/* Page Routes */}
       <div className="pt-28">
         <Routes>
-          <Route path="/" element={<EmployeeHome />} exact/>
           <Route path="/employee/EmpHome" element={<EmployeeHome />} exact/>
           <Route path="/employee/applyleave" element={<ApplyLeave />} exact/>
           <Route path="/employee/profile" element={<EmployeeProfile />} exact/>

@@ -1,4 +1,3 @@
-// AdminNavBar.js
 import React, { useState, useEffect } from "react";
 import { Link, Routes, Route, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -18,7 +17,7 @@ import BackendURLS from "../config";
 import axios from "axios";
 import "react-toastify/dist/ReactToastify.css";
 
-export default function AdminNavBar() {
+export default function AdminNavBar({ setIsAdminLoggedIn }) {
   const [box, setBox] = useState(false);
   const [oldpwd, setOldpwd] = useState('');
   const [newpwd, setNewpwd] = useState('');
@@ -65,32 +64,24 @@ export default function AdminNavBar() {
     pwd1.type = pwd2.type = pwd3.type = type;
   };
 
-   const handleLogout = ()=>{
-    sessionStorage.removeItem("isAdminLoggedIn")
-    sessionStorage.removeItem("admin")
-    sessionStorage.removeItem("AdminToken")
-     toast.success("Admin Logged out successfully!", {
-                theme: "colored",
-                autoClose: 1000,
-              });
-    
-    navigate('/adminlogin')
-    window.location.reload()
-  }
+  const handleLogout = () => {
+    sessionStorage.removeItem("isAdminLoggedIn");
+    sessionStorage.removeItem("admin");
+    sessionStorage.removeItem("AdminToken");
+    setIsAdminLoggedIn(false); // important to switch navbar
+    toast.success("Admin logged out successfully!", { theme: "colored", autoClose: 1000 });
+    navigate("/", { replace: true }); // redirect to MainHome
+  };
 
-
-  // reusable class for navbar links
-  const navLinkClass = "text-white hover:text-pink-400 focus:text-pink-400 active:text-pink-400 visited:text-white transition";
+  const navLinkClass = "text-white hover:text-pink-400 transition";
 
   return (
     <div className="relative min-h-screen">
-      {/* Fixed Glass Navbar */}
       <motion.nav
         initial={{ y: -80, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.6 }}
-        className="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-8 py-4
-                   bg-white/10 backdrop-blur-xl border-b border-white/20 shadow-lg rounded-b-lg"
+        className="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-8 py-4 bg-white/10 backdrop-blur-xl border-b border-white/20 shadow-lg rounded-b-lg"
       >
         <div className="flex-1 flex items-center gap-4">
           <Link className={`${navLinkClass} font-bold text-xl`}>Employee Leave Management System</Link>
@@ -119,12 +110,11 @@ export default function AdminNavBar() {
               </details>
             </li>
             <li><Link onClick={() => setBox(true)} className={navLinkClass}>Change Password</Link></li>
-            <li><Link onClick={handleLogout} className={navLinkClass}>Logout</Link></li>
+            <li><button onClick={handleLogout} className={navLinkClass}>Logout</button></li>
           </ul>
         </div>
       </motion.nav>
 
-      {/* Page Routes */}
       <div className="pt-28">
         <Routes>
           <Route path="/" element={<AdminHome />} />
@@ -141,32 +131,13 @@ export default function AdminNavBar() {
         </Routes>
       </div>
 
-      {/* Change Password Modal */}
       <Modal backdrop={"blur"} isOpen={box} onClose={() => setBox(false)}>
         <ModalContent className="bg-white/20 backdrop-blur-lg rounded-xl p-6">
           <ModalHeader className="text-xl text-white font-semibold">Change Password</ModalHeader>
           <ModalBody className="flex flex-col gap-4">
-            <input
-              id="oldpwd"
-              placeholder="Enter Current Password"
-              type="password"
-              onChange={(e) => setOldpwd(e.target.value)}
-              className="p-3 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-400 transition"
-            />
-            <input
-              id="newpwd"
-              placeholder="Enter New Password"
-              type="password"
-              onChange={(e) => setNewpwd(e.target.value)}
-              className="p-3 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-400 transition"
-            />
-            <input
-              id="con"
-              placeholder="Re-enter New Password"
-              type="password"
-              onChange={(e) => setConpwd(e.target.value)}
-              className="p-3 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-400 transition"
-            />
+            <input id="oldpwd" placeholder="Enter Current Password" type="password" onChange={(e) => setOldpwd(e.target.value)} className="p-3 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-400 transition"/>
+            <input id="newpwd" placeholder="Enter New Password" type="password" onChange={(e) => setNewpwd(e.target.value)} className="p-3 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-400 transition"/>
+            <input id="con" placeholder="Re-enter New Password" type="password" onChange={(e) => setConpwd(e.target.value)} className="p-3 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-400 transition"/>
             <Checkbox id="check" onClick={ShowPassword} className="text-white">Show Password</Checkbox>
           </ModalBody>
           <ModalFooter className="flex justify-between">

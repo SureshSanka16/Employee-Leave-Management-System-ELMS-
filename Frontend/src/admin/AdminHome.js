@@ -4,8 +4,7 @@ import BackendURLS from "../config";
 import axios from "axios";
 import { motion } from "framer-motion";
 import { Spinner } from "@nextui-org/react";
-import image21 from '../components/images/21.png';
-import bgImage from '../components/images/bg1.jpg';
+import bgImage from '../components/images/bg1.jpg'; // bg can stay in src
 
 // Analysis Card component
 const AnalysisCard = ({ title, value }) => (
@@ -45,9 +44,7 @@ export default function AdminHome() {
     }
   };
 
-  useEffect(() => {
-    fetchAnalysis();
-  }, []);
+  useEffect(() => { fetchAnalysis(); }, []);
 
   useEffect(() => {
     const admin = JSON.parse(sessionStorage.getItem("admin"));
@@ -61,11 +58,7 @@ export default function AdminHome() {
       typeSpeed: 50,
       loop: false,
     });
-
-    return () => {
-      typed.destroy();
-      typed1.destroy();
-    };
+    return () => { typed.destroy(); typed1.destroy(); };
   }, []);
 
   return (
@@ -73,7 +66,6 @@ export default function AdminHome() {
       className="min-h-screen bg-cover bg-center flex flex-col items-center"
       style={{ backgroundImage: `url(${bgImage})` }}
     >
-      {/* Typed Welcome Text */}
       <div className="text-center mt-10">
         <h1 className="text-3xl font-bold text-white">
           <span id="typed-text"></span>
@@ -86,7 +78,7 @@ export default function AdminHome() {
       {/* Main Image */}
       <div className="flex justify-center mt-8">
         <img
-          src={image21}
+          src="/images/21.jpg"  // ✅ Updated to public folder path
           alt="Employee Leave Management System"
           className="max-w-lg w-full h-auto rounded-lg shadow-2xl"
         />

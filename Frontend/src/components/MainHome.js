@@ -1,5 +1,4 @@
 import { useEffect } from 'react';
-import image21 from '../components/images/21.png'
 import Typed from 'typed.js';
 
 export default function MainHome() {
@@ -7,7 +6,7 @@ export default function MainHome() {
     const typed = new Typed('#typed-text', {
       strings: ['Welcome To Employee Leave Management System'], 
       typeSpeed: 50,
-      loop: false, // <-- properly closed
+      loop: false,
     });
 
     return () => {
@@ -27,7 +26,7 @@ export default function MainHome() {
           <span id="typed-text"></span>
         </h1>
 
-        {/* Subtitle (optional intro line) */}
+        {/* Subtitle */}
         <p className="mt-4 text-gray-200 text-lg">
           A simple and secure way to manage employee leaves
         </p>
@@ -35,7 +34,7 @@ export default function MainHome() {
         {/* Image */}
         <div className="flex justify-center">
           <img 
-            src={image21} 
+            src="/images/21.jpg"  // ✅ Use public folder path
             alt="Employee Leave Management System" 
             className="mt-10 max-w-lg w-full h-auto drop-shadow-lg" 
           />

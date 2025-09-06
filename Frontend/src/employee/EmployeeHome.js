@@ -1,9 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import Typed from "typed.js";
 import axios from "axios";
 import BackendURLS from "../config";
-import image21 from '../components/images/21.png';
-import bgImage from '../components/images/bg1.jpg';
 import { motion } from 'framer-motion';
 import { Spinner } from "@nextui-org/react";
 
@@ -75,7 +73,7 @@ export default function EmployeeHome() {
   return (
     <div
       className="min-h-screen bg-cover bg-center flex flex-col items-center"
-      style={{ backgroundImage: `url(${bgImage})` }}
+      style={{ backgroundImage: `url(/images/bg1.jpg)` }} // ✅ public folder
     >
       {/* Typed Welcome Text */}
       <div className="text-center mt-10">
@@ -90,7 +88,7 @@ export default function EmployeeHome() {
       {/* Main Image */}
       <div className="flex justify-center mt-8">
         <img
-          src={image21}
+          src="/images/21.jpg"  // ✅ public folder
           alt="Employee Leave Management System"
           className="max-w-lg w-full h-auto rounded-lg shadow-2xl"
         />
